@@ -190,9 +190,8 @@
 
         <!-- List Card -->
         <div
-            class="relative flex max-w-max grid-cols-2 gap-4 overflow-hidden rounded max-sm:flex-wrap shadow-lg border p-5"
-            v-else
-        >
+            class="relative flex max-w-max grid-cols-2 gap-4 overflow-hidden rounded max-sm:flex-wrap max-sm:justify-center max-sm:items-center shadow-lg border p-5 "
+            v-else>
             <div class="group relative max-h-[258px] max-w-[250px] overflow-hidden">
 
                 {!! view_render_event('bagisto.shop.components.products.card.image.before') !!}
