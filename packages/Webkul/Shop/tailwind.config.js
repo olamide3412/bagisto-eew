@@ -34,6 +34,7 @@ module.exports = {
                 darkGreen: '#40994A',
                 darkBlue: '#0044F2',
                 darkPink: '#F85156',
+                lightPurple: '#ac83fc',
             },
 
             fontFamily: {

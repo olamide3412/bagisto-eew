@@ -21,15 +21,14 @@
             <div class="relative">
                 <div
                     ref="swiperContainer"
-                    class="scrollbar-hide flex gap-10 overflow-auto scroll-smooth max-lg:gap-4"
+                    class="scrollbar-hide flex gap-10 overflow-auto scroll-smooth max-lg:gap-10"
                 >
                     <div
                         class="grid min-w-[120px] max-w-[120px] grid-cols-1 justify-items-center gap-4 font-medium max-md:min-w-20 max-md:max-w-20 max-md:gap-2.5 max-md:first:ml-4 max-sm:min-w-[60px] max-sm:max-w-[60px] max-sm:gap-1.5"
-                        v-for="category in categories"
-                    >
+                        v-for="category in categories">
                         <a
                             :href="category.slug"
-                            class="h-[110px] w-[110px] rounded-full bg-zinc-100 max-md:h-20 max-md:w-20 max-sm:h-[60px] max-sm:w-[60px]"
+                            class="h-[110px] w-[110px] rounded-full shadow-lg bg-zinc-100  max-md:h-20 max-md:w-20 max-sm:h-[60px] max-sm:w-[60px]"
                             :aria-label="category.name"
                         >
                             <x-shop::media.images.lazy
