@@ -237,9 +237,11 @@ return [
         Webkul\Tax\Providers\TaxServiceProvider::class,
         Webkul\Theme\Providers\ThemeServiceProvider::class,
         Webkul\User\Providers\UserServiceProvider::class,
+        Webkul\EewTheme\Providers\EewThemeServiceProvider::class,
     ])->toArray(),
 
     /*
+        WebKul\EewTheme\Providers\EewThemeServiceProvider::class,
     |--------------------------------------------------------------------------
     | Class Aliases
     |--------------------------------------------------------------------------

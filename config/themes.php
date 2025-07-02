@@ -24,6 +24,17 @@ return [
                 'package_assets_directory' => 'src/Resources/assets',
             ],
         ],
+        'eew-theme' => [
+            'name'        => 'EEW Theme',
+            'assets_path' => 'public/themes/eew-theme/default',
+            'views_path'  => 'resources/themes/eew-theme/views',
+
+            'vite'        => [
+                'hot_file'                 => 'shop-eew-theme-vite.hot',
+                'build_directory'          => 'themes/shop/eew-theme/build',
+                'package_assets_directory' => 'src/Resources/assets',
+            ],
+        ],
     ],
 
     /*
