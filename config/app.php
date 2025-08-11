@@ -238,6 +238,7 @@ return [
         Webkul\Theme\Providers\ThemeServiceProvider::class,
         Webkul\User\Providers\UserServiceProvider::class,
         Webkul\EewTheme\Providers\EewThemeServiceProvider::class,
+        Webkul\FlutterwavePayment\Providers\FlutterwavePaymentServiceProvider::class,
     ])->toArray(),
 
     /*

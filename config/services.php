@@ -79,4 +79,9 @@ return [
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
         'redirect'      => env('GITHUB_CALLBACK_URL'),
     ],
+    'flutterwave' => [
+        'public_key'     => env('FLUTTERWAVE_PUBLIC_KEY'),
+        'secret_key' => env('FLUTTERWAVE_SECRET_KEY'),
+        'encryption_key'      => env('FLUTTERWAVE_ENCRYPTION_KEY'),
+    ],
 ];

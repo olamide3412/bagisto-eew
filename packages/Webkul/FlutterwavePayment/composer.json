@@ -1,0 +1,20 @@
+{
+    "name": "webkul/flutterwave-payment",
+    "description": "Flutterwave Payment integration for Bagisto",
+    "type": "bagisto-payment",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Webkul\\FlutterwavePayment\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\FlutterwavePayment\\Providers\\FlutterwavePaymentServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
