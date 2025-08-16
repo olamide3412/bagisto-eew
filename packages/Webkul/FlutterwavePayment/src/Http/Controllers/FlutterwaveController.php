@@ -24,7 +24,32 @@ class FlutterwaveController extends Controller
 
     public function callback(Request $request)
     {
-        return $this->success($request);
+        //return $this->success($request);
+        $status = $request->status;
+        $txRef  = $request->tx_ref; // e.g. BAG-21
+        $orderId = str_replace('BAG-', '', $txRef);
+
+        $order = $this->orderRepository->find($orderId);
+
+        if (! $order) {
+            Log::error('Order not found for Flutterwave callback', ['tx_ref' => $txRef]);
+            return redirect()->route('shop.checkout.cart.index');
+        }
+
+        $secretKey = core()->getConfigData('sales.payment_methods.flutterwave.secret_key');
+
+        if ($status === 'successful') {
+
+                $this->orderRepository->update(['status' => 'processing'], $orderId);
+                session()->flash('order_id', $order->id); // the flash on Webkul\FlutterwavePayment\Payment is the one that works not this
+
+                Log::info('Checkout success ', ['order id' => $order->id, 'order' => $order]);
+                return redirect()->route('shop.checkout.onepage.success');
+        }
+
+        $this->orderRepository->update(['status' => 'canceled'], $orderId);
+        session()->flash('error', 'Payment failed or was cancelled.');
+        return redirect()->route('shop.checkout.cart.index');
     }
     /**
      * Cancel payment
@@ -40,7 +65,14 @@ class FlutterwaveController extends Controller
     /**
      * Successful payment callback
      */
-    public function success(Request $request)
+    public function showSuccessPage($order_id)
+    {
+         $order = $this->orderRepository->findOrFail($order_id);
+
+        return view('flutterwavepayment::payment.success', compact('order'));
+    }
+
+    public function successOLD(Request $request)
     {
         $status = $request->status;
         $transactionId = $request->transaction_id;
@@ -63,7 +95,8 @@ class FlutterwaveController extends Controller
 
                     session()->flash('order_id', $order->id);
 
-                    return redirect()->route('shop.checkout.onepage.success');
+                    return redirect()->route('flutterwave.payment.success');
+                    //return redirect()->route('shop.checkout.onepage.success');
                 } else{
                     Log::error('Flutterwave status cart not found ', ['cart' => $cart]);
                 }

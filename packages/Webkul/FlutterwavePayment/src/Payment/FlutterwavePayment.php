@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Webkul\Sales\Repositories\OrderRepository;
 
+use Illuminate\Http\Request;
+use Webkul\Checkout\Facades\Cart;
+use Webkul\Sales\Transformers\OrderResource;
+use Webkul\Shop\Http\Controllers\Controller;
+
 class FlutterwavePayment extends Payment
 {
+      public function __construct(protected OrderRepository $orderRepository) {}
     /**
      * Payment method code
      *
@@ -22,68 +28,59 @@ class FlutterwavePayment extends Payment
      *
      * @return string
      */
-    public function getRedirectUrl($order = null)
+    public function getRedirectUrl()
     {
-        // Prefer order if passed (some flows pass order), otherwise use current cart
-        $cart = $order ?: $this->getCart();
+        $cart = Cart::getCart();
 
-        if (! $cart) {
-            return route('shop.checkout.cart.index');
-        }
+        // Create the order first
+        $data = (new OrderResource($cart))->jsonSerialize();
+        $order = $this->orderRepository->create($data);
+        Cart::deActivateCart();
 
-        // Billing info (cart or order shape)
-        $billing = $cart->billing_address ?? ($cart->billing ?? null);
-
-        // Amount & currency
-        $amount = $this->formatCurrencyValue($cart->grand_total ?? $cart->base_grand_total ?? 0);
-        $currency = $cart->order_currency_code ?? $cart->cart_currency_code ?? core()->getCurrentCurrencyCode() ?? 'NGN';
-
-        // Get keys from admin config (system.php fields)
-        $secretKey     = $this->getConfigData('secret_key');
-        $publicKey     = $this->getConfigData('public_key');
-        $encryptionKey = $this->getConfigData('encryption_key');
-
-        if (! $secretKey) {
-            Log::error('Flutterwave: missing secret_key in payment config');
-            return route('shop.checkout.cart.index');
-        }
-
-        $txRef = 'BAG-' . ($cart->id ?? uniqid());
-
+        // Prepare payment request
         $payload = [
-            'tx_ref'       => $txRef,
-            'amount'       => (string) $amount,
-            'currency'     => $currency,
+            'tx_ref' => 'BAG-' . $order->id,
+            'amount' => $order->grand_total,
+            'currency' => $order->order_currency_code,
             'redirect_url' => route('flutterwave.callback'),
-            'customer'     => [
-                'email' => $billing->email ?? $cart->customer_email ?? null,
-                'name'  => trim(($billing->first_name ?? $cart->customer_first_name ?? '') . ' ' . ($billing->last_name ?? $cart->customer_last_name ?? '')),
-                'phone' => $this->formatPhone($billing->phone ?? $billing->telephone ?? ''),
+            'customer' => [
+                'email' => $order->customer_email,
+                'name'  => $order->customer_first_name . ' ' . $order->customer_last_name,
+                'phone' => $order->customer_phone ?? '',
             ],
             'payment_options' => 'card,banktransfer,ussd',
             'customizations' => [
-                'title'       => $this->getConfigData('title') ?: 'Payment',
-                'description' => $this->getConfigData('description') ?: '',
-                'logo'        => $this->getImage(),
-            ],
+                'title' => 'Flutterwave Payment',
+                'description' => 'Payment for Order #' . $order->id,
+                'logo' => core()->getConfigData('general.design.admin_logo.logo_image'),
+            ]
         ];
+
+        //$secretKey = config('services.flutterwave.secret_key');
+        $secretKey     = $this->getConfigData('secret_key');
+        //$publicKey     = $this->getConfigData('public_key');
+        //$encryptionKey = $this->getConfigData('encryption_key');
+
 
         try {
             $response = Http::withToken($secretKey)
                 ->post('https://api.flutterwave.com/v3/payments', $payload)
                 ->json();
+
         } catch (\Throwable $e) {
+            Log::error('Flutterwave init exception', ['error' => $e->getMessage()]);
             Log::error('Flutterwave init exception: ' . $e->getMessage(), ['payload' => $payload]);
-            return route('shop.checkout.cart.index');
+             return route('shop.checkout.cart.index'); // <== HERE
         }
 
         if (isset($response['status']) && $response['status'] === 'success' && isset($response['data']['link'])) {
-            return $response['data']['link'];
+            session()->flash('order_id', $order->id);
+            return $response['data']['link']; // <== Payment page link
         }
 
         Log::error('Flutterwave init failed', ['response' => $response, 'payload' => $payload]);
-
-        return route('shop.checkout.cart.index');
+        session()->flash('error', 'Payment initialization failed. Please try again.');
+        return redirect()->route('shop.checkout.cart.index');
     }
 
     /**

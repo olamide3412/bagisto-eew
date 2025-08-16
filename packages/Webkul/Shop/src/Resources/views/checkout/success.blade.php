@@ -75,11 +75,47 @@
 
 			{{ view_render_event('bagisto.shop.checkout.success.continue-shopping.before', ['order' => $order]) }}
 
-			<a href="{{ route('shop.home.index') }}">
-				<div class="m-auto mx-auto block w-max cursor-pointer rounded-2xl bg-navyBlue px-11 py-3 text-center text-base font-medium text-white max-md:rounded-lg max-md:px-6 max-md:py-1.5">
-             		@lang('shop::app.checkout.cart.index.continue-shopping')
-				</div>
-			</a>
+			<!--This was where the Continue shopping button is before-->
+
+            <div class="container place-items-center" style="padding: 15px;">
+
+                <h2 class="text-2xl font-medium max-md:text-base">
+                    Order Summary
+                </h2>
+
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid black; padding: 10px;">Product</th>
+                            <th style="border: 1px solid black; padding: 10px;">Qty</th>
+                            <th style="border: 1px solid black; padding: 10px;">Price</th>
+                            <th style="border: 1px solid black; padding: 10px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($order->items as $item)
+                            <tr>
+                                <td style="border: 1px solid black; padding: 10px;">{{ $item->name }}</td>
+                                <td style="border: 1px solid black; padding: 10px;">{{ $item->qty_ordered }}</td>
+                                <td style="border: 1px solid black; padding: 10px;">{{ core()->currency($item->price) }}</td>
+                                <td style="border: 1px solid black; padding: 10px;">{{ core()->currency($item->total) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+
+                <h3 >Total Amount: {{ core()->currency($order->grand_total) }}</h3>
+                <p>Status: <strong>{{ ucfirst($order->status) }}</strong></p>
+
+            </div>
+
+            <a href="{{ route('shop.home.index') }}">
+                <div class="m-auto mx-auto block w-max cursor-pointer rounded-2xl bg-navyBlue px-11 py-3 text-center text-base font-medium text-white max-md:rounded-lg max-md:px-6 max-md:py-1.5">
+                    @lang('shop::app.checkout.cart.index.continue-shopping')
+                </div>
+            </a>
+
 
 			{{ view_render_event('bagisto.shop.checkout.success.continue-shopping.after', ['order' => $order]) }}
 		</div>
